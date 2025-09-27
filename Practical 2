@@ -1,0 +1,160 @@
+@model SimpleBlog.Controllers.BlogController.BlogViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@if (Model.ActionType == "Index")
+{
+    <h2>All Posts</h2>
+    <a asp-action="Add">Add New Post</a>
+    <hr />
+    @if (Model.Posts.Count > 0)
+    {
+        <table border="1" cellpadding="5">
+            <tr><th>Title</th><th>Content</th><th>Actions</th></tr>
+            @foreach (var p in Model.Posts)
+            {
+                <tr>
+                    <td>@p.Title</td>
+                    <td>@p.Content</td>
+                    <td><a asp-action="Edit" asp-route-id="@p.Id">Edit</a></td>
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <p>No posts yet.</p>
+    }
+}
+
+@if (Model.ActionType == "Add" || Model.ActionType == "Edit")
+{
+    <h2>@Model.ActionType Post</h2>
+    <form asp-action="@Model.ActionType" method="post">
+        @if (Model.ActionType == "Edit")
+        {
+            <input type="hidden" asp-for="CurrentPost.Id" />
+        }
+        <p>Title: <input asp-for="CurrentPost.Title" /> <span asp-validation-for="CurrentPost.Title" style="color:red"></span></p>
+        <p>Content: <textarea asp-for="CurrentPost.Content"></textarea> <span asp-validation-for="CurrentPost.Content" style="color:red"></span></p>
+        <button type="submit">@Model.ActionType</button>
+    </form>
+    <a asp-action="Index">Back to Posts</a>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}bLOG.CSHTML
+
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+
+namespace SimpleBlog.Controllers
+{
+    public class BlogController : Controller
+    {
+        static List<Post> posts = new List<Post>();
+
+        // Show all posts
+        public IActionResult Index()
+        {
+            var vm = new BlogViewModel { Posts = posts, ActionType = "Index" };
+            return View("Blog", vm);
+        }
+
+        // Add new post (GET)
+        [HttpGet]
+        public IActionResult Add()
+        {
+            var vm = new BlogViewModel { CurrentPost = new Post(), ActionType = "Add" };
+            return View("Blog", vm);
+        }
+
+        // Add new post (POST)
+        [HttpPost]
+        public IActionResult Add(Post p)
+        {
+            if (ModelState.IsValid)
+            {
+                p.Id = posts.Count > 0 ? posts.Max(x => x.Id) + 1 : 1;
+                posts.Add(p);
+                return RedirectToAction("Index");
+            }
+            var vm = new BlogViewModel { CurrentPost = p, ActionType = "Add" };
+            return View("Blog", vm);
+        }
+
+        // Edit post (GET)
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var post = posts.FirstOrDefault(x => x.Id == id);
+            if (post == null) return NotFound();
+            var vm = new BlogViewModel { CurrentPost = post, ActionType = "Edit" };
+            return View("Blog", vm);
+        }
+
+        // Edit post (POST)
+        [HttpPost]
+        public IActionResult Edit(Post p)
+        {
+            if (ModelState.IsValid)
+            {
+                var post = posts.FirstOrDefault(x => x.Id == p.Id);
+                if (post != null)
+                {
+                    post.Title = p.Title;
+                    post.Content = p.Content;
+                }
+                return RedirectToAction("Index");
+            }
+            var vm = new BlogViewModel { CurrentPost = p, ActionType = "Edit" };
+            return View("Blog", vm);
+        }
+
+        // Models
+        public class BlogViewModel
+        {
+            public List<Post> Posts { get; set; } = new List<Post>();
+            public Post CurrentPost { get; set; } = new Post();
+            public string ActionType { get; set; } = "Index";
+        }
+
+        public class Post
+        {
+            public int Id { get; set; }
+
+            [Required(ErrorMessage = "Title is required")]
+            public string Title { get; set; }
+
+            [Required(ErrorMessage = "Content is required")]
+            public string Content { get; set; }
+        }
+    }
+}
+
+BlogController.cs
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Blog}/{action=Index}/{id?}");
+
+app.Run();
+Program.cs
