@@ -14,13 +14,13 @@ namespace AuthDemo.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult AdminPage()
         {
-            return View(); // make sure Views/Home/AdminPage.cshtml exists
+            return View(); 
         }
 
         [Authorize(Roles = "User")]
         public IActionResult UserPage()
         {
-            return View(); // make sure Views/Home/UserPage.cshtml exists
+            return View(); 
         }
     }
 }
