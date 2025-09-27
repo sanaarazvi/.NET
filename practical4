@@ -1,0 +1,140 @@
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+
+namespace SimpleLogin.Controllers
+{
+    public class UserController : Controller
+    {
+        // In-memory users storage
+        static List<User> users = new List<User>();
+
+        // Show Register form
+        [HttpGet]
+        public IActionResult Register()
+        {
+            var vm = new UserViewModel { ActionType = "Register" };
+            return View("User", vm);
+        }
+
+        // Handle Register post
+        [HttpPost]
+        public IActionResult Register(User u)
+        {
+            if (ModelState.IsValid)
+            {
+                if (users.Any(x => x.Email == u.Email))
+                {
+                    ModelState.AddModelError("Email", "Email already exists");
+                    return View("User", new UserViewModel { CurrentUser = u, ActionType = "Register" });
+                }
+                users.Add(u);
+                TempData["Message"] = "Registration successful! Please login.";
+                return RedirectToAction("Login");
+            }
+            return View("User", new UserViewModel { CurrentUser = u, ActionType = "Register" });
+        }
+
+        // Show Login form
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View("User", new UserViewModel { ActionType = "Login" });
+        }
+
+        // Handle Login post
+        [HttpPost]
+        public IActionResult Login(User u)
+        {
+            var user = users.FirstOrDefault(x => x.Email == u.Email && x.Password == u.Password);
+            if (user != null)
+            {
+                TempData["Message"] = $"Welcome {user.Name}!";
+                return RedirectToAction("Login");
+            }
+            ModelState.AddModelError("", "Invalid Email or Password");
+            return View("User", new UserViewModel { CurrentUser = u, ActionType = "Login" });
+        }
+
+        // Models
+        public class UserViewModel
+        {
+            public string ActionType { get; set; } = "Register"; // "Register" or "Login"
+            public User CurrentUser { get; set; } = new User();
+        }
+
+        public class User
+        {
+            [Required(ErrorMessage = "Name is required")]
+            public string Name { get; set; }
+
+            [Required(ErrorMessage = "Email is required")]
+            [EmailAddress(ErrorMessage = "Invalid Email")]
+            public string Email { get; set; }
+
+            [Required(ErrorMessage = "Password is required")]
+            [MinLength(4, ErrorMessage = "Password must be at least 4 characters")]
+            public string Password { get; set; }
+        }
+    }
+}
+
+Usercontroller.cs
+@model SimpleLogin.Controllers.UserController.UserViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@if (Model.ActionType == "Register")
+{
+    <h2>Register</h2>
+    <form asp-action="Register" method="post">
+        <p>Name: <input asp-for="CurrentUser.Name" /> <span asp-validation-for="CurrentUser.Name" style="color:red"></span></p>
+        <p>Email: <input asp-for="CurrentUser.Email" /> <span asp-validation-for="CurrentUser.Email" style="color:red"></span></p>
+        <p>Password: <input asp-for="CurrentUser.Password" type="password" /> <span asp-validation-for="CurrentUser.Password" style="color:red"></span></p>
+        <button type="submit">Register</button>
+    </form>
+    <a asp-action="Login">Already have an account? Login</a>
+}
+
+@if (Model.ActionType == "Login")
+{
+    <h2>Login</h2>
+    @if (TempData["Message"] != null)
+    {
+        <p style="color:green">@TempData["Message"]</p>
+    }
+    <form asp-action="Login" method="post">
+        <p>Email: <input asp-for="CurrentUser.Email" /> <span asp-validation-for="CurrentUser.Email" style="color:red"></span></p>
+        <p>Password: <input asp-for="CurrentUser.Password" type="password" /> <span asp-validation-for="CurrentUser.Password" style="color:red"></span></p>
+        <span asp-validation-summary="All" style="color:red"></span>
+        <button type="submit">Login</button>
+    </form>
+    <a asp-action="Register">Don't have an account? Register</a>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+User.cshtml
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=User}/{action=Register}/{id?}");
+
+app.Run();
+Program.cs
