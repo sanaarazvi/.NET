@@ -1,0 +1,61 @@
+using SimpleApi.Models;
+
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+// In-memory data storage
+var products = new List<Product>
+{
+    new Product { Id = 1, Name = "Apple", Price = 10 },
+    new Product { Id = 2, Name = "Banana", Price = 5 }
+};
+
+// GET all products
+app.MapGet("/products", () => products);
+
+// GET product by id
+app.MapGet("/products/{id}", (int id) =>
+{
+    var product = products.FirstOrDefault(p => p.Id == id);
+    return product != null ? Results.Ok(product) : Results.NotFound();
+});
+
+// POST create new product
+app.MapPost("/products", (Product product) =>
+{
+    product.Id = products.Any() ? products.Max(p => p.Id) + 1 : 1;
+    products.Add(product);
+    return Results.Created($"/products/{product.Id}", product);
+});
+
+// PUT update product
+app.MapPut("/products/{id}", (int id, Product updatedProduct) =>
+{
+    var product = products.FirstOrDefault(p => p.Id == id);
+    if (product == null) return Results.NotFound();
+
+    product.Name = updatedProduct.Name;
+    product.Price = updatedProduct.Price;
+    return Results.Ok(product);
+});
+
+// DELETE product
+app.MapDelete("/products/{id}", (int id) =>
+{
+    var product = products.FirstOrDefault(p => p.Id == id);
+    if (product == null) return Results.NotFound();
+
+    products.Remove(product);
+    return Results.Ok();
+});
+namespace SimpleApi.Models
+{
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+    }
+}
+
+app.Run();
