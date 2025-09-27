@@ -7,7 +7,7 @@ namespace SimpleApp.Controllers
 {
     public class UserController : Controller
     {
-        // In-memory storage
+        
         static List<User> users = new List<User>();
 
         [HttpGet]
@@ -38,7 +38,7 @@ namespace SimpleApp.Controllers
             return View(model); // show validation errors
         }
 
-        // View model for binding
+       
         public class UserViewModel
         {
             [Required(ErrorMessage = "Name is required")]
@@ -61,7 +61,7 @@ namespace SimpleApp.Controllers
             public string[] Courses { get; set; }
         }
 
-        // Stored user data
+    
         public class User
         {
             public string Name { get; set; }
@@ -133,12 +133,12 @@ namespace SimpleApp.Controllers
 Index.cshtml
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
