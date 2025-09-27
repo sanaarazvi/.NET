@@ -6,7 +6,6 @@ namespace MiniCrud.Controllers
 {
     public class HomeController : Controller
     {
-        // Simple Product model
         public class Product
         {
             public int Id { get; set; }
@@ -14,17 +13,17 @@ namespace MiniCrud.Controllers
             public decimal Price { get; set; }
         }
 
-        // Start with an empty list
+       
         private static List<Product> products = new List<Product>();
 
-        // Show list
+       
         public IActionResult Index(int? editId)
         {
             ViewBag.EditId = editId;
             return View(products);
         }
 
-        // Add product
+     
         [HttpPost]
         public IActionResult Add(string name, decimal price)
         {
@@ -33,7 +32,6 @@ namespace MiniCrud.Controllers
             return RedirectToAction("Index");
         }
 
-        // Edit product
         [HttpPost]
         public IActionResult Edit(int id, string name, decimal price)
         {
@@ -42,7 +40,7 @@ namespace MiniCrud.Controllers
             return RedirectToAction("Index");
         }
 
-        // Delete product
+        
         [HttpPost]
         public IActionResult Delete(int id)
         {
