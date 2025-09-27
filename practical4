@@ -7,10 +7,10 @@ namespace SimpleLogin.Controllers
 {
     public class UserController : Controller
     {
-        // In-memory users storage
+        
         static List<User> users = new List<User>();
 
-        // Show Register form
+        
         [HttpGet]
         public IActionResult Register()
         {
@@ -18,7 +18,7 @@ namespace SimpleLogin.Controllers
             return View("User", vm);
         }
 
-        // Handle Register post
+     
         [HttpPost]
         public IActionResult Register(User u)
         {
@@ -36,14 +36,14 @@ namespace SimpleLogin.Controllers
             return View("User", new UserViewModel { CurrentUser = u, ActionType = "Register" });
         }
 
-        // Show Login form
+        
         [HttpGet]
         public IActionResult Login()
         {
             return View("User", new UserViewModel { ActionType = "Login" });
         }
 
-        // Handle Login post
+    
         [HttpPost]
         public IActionResult Login(User u)
         {
@@ -57,7 +57,7 @@ namespace SimpleLogin.Controllers
             return View("User", new UserViewModel { CurrentUser = u, ActionType = "Login" });
         }
 
-        // Models
+     
         public class UserViewModel
         {
             public string ActionType { get; set; } = "Register"; // "Register" or "Login"
