@@ -1,0 +1,69 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AuthDemo.Controllers
+{
+    [Authorize]
+    public class HomeController : Controller
+    {
+        public IActionResult Index()
+        {
+            return View(); // renders Views/Home/Index.cshtml
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult AdminPage()
+        {
+            return View(); // make sure Views/Home/AdminPage.cshtml exists
+        }
+
+        [Authorize(Roles = "User")]
+        public IActionResult UserPage()
+        {
+            return View(); // make sure Views/Home/UserPage.cshtml exists
+        }
+    }
+}
+HomeController.cs
+<h2>User Page</h2>
+<p>Welcome User!</p>
+<p><a href="/Account/Logout">Logout</a></p>
+UserPage.cshtml
+@{
+    ViewBag.Title = "Home";
+}
+
+<h2>Welcome @(User.Identity?.Name ?? "Guest")!</h2>
+
+<p>
+    <a href="/Account/Logout">Logout</a>
+</p>
+
+@if (User.Identity != null)
+{
+    if (User.IsInRole("Admin"))
+    {
+        <p><a href="/Home/AdminPage">Go to Admin Page</a></p>
+    }
+    else if (User.IsInRole("User"))
+    {
+        <p><a href="/Home/UserPage">Go to User Page</a></p>
+    }
+}
+Index.cshtml
+{
+    ViewBag.Title = "Login";
+}
+<h2>Login</h2>
+<form method="post">
+    <label>Username:</label>
+    <input name="username" /><br />
+    <label>Password:</label>
+    <input name="password" type="password" /><br />
+    <button type="submit">Login</button>
+</form>
+@if (ViewBag.Error != null)
+{
+    <p style="color:red">@ViewBag.Error</p>
+}
+Login.cshtml
