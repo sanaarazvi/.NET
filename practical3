@@ -1,0 +1,161 @@
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+
+namespace SimpleApp.Controllers
+{
+    public class UserController : Controller
+    {
+        // In-memory storage
+        static List<User> users = new List<User>();
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View(new UserViewModel());
+        }
+
+        [HttpPost]
+        public IActionResult Register(UserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                users.Add(new User
+                {
+                    Name = model.Name,
+                    Email = model.Email,
+                    Gender = model.Gender,
+                    Courses = model.Courses != null ? string.Join(", ", model.Courses) : ""
+                });
+
+                ViewBag.Users = users;
+                ViewBag.Message = "User registered successfully!";
+                return View(new UserViewModel()); // clear form
+            }
+
+            ViewBag.Users = users;
+            return View(model); // show validation errors
+        }
+
+        // View model for binding
+        public class UserViewModel
+        {
+            [Required(ErrorMessage = "Name is required")]
+            public string Name { get; set; }
+
+            [Required(ErrorMessage = "Email is required")]
+            [EmailAddress(ErrorMessage = "Invalid Email")]
+            public string Email { get; set; }
+
+            [Required(ErrorMessage = "Password is required")]
+            [MinLength(4, ErrorMessage = "Password must be at least 4 characters")]
+            public string Password { get; set; }
+
+            [Compare("Password", ErrorMessage = "Passwords do not match")]
+            public string ConfirmPassword { get; set; }
+
+            [Required(ErrorMessage = "Select Gender")]
+            public string Gender { get; set; }
+
+            public string[] Courses { get; set; }
+        }
+
+        // Stored user data
+        public class User
+        {
+            public string Name { get; set; }
+            public string Email { get; set; }
+            public string Gender { get; set; }
+            public string Courses { get; set; }
+        }
+    }
+}UserController.cs
+@model SimpleApp.Controllers.UserController.UserViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>User Registration</h2>
+
+@if (ViewBag.Message != null)
+{
+    <div style="color:green">@ViewBag.Message</div>
+}
+
+<form asp-action="Register" method="post">
+    <p>Name: <input asp-for="Name" /> <span asp-validation-for="Name" style="color:red"></span></p>
+    <p>Email: <input asp-for="Email" type="email" /> <span asp-validation-for="Email" style="color:red"></span></p>
+    <p>Password: <input asp-for="Password" type="password" /> <span asp-validation-for="Password" style="color:red"></span></p>
+    <p>Confirm Password: <input asp-for="ConfirmPassword" type="password" /> <span asp-validation-for="ConfirmPassword" style="color:red"></span></p>
+
+    <p>
+        Gender:
+        <input type="radio" asp-for="Gender" value="Male" /> Male
+        <input type="radio" asp-for="Gender" value="Female" /> Female
+        <span asp-validation-for="Gender" style="color:red"></span>
+    </p>
+
+    <p>
+        Select Courses:
+        <input type="checkbox" name="Courses" value="J2SEE" /> J2SEE
+        <input type="checkbox" name="Courses" value="J2EE" /> J2EE
+        <input type="checkbox" name="Courses" value="Spring Framework" /> Spring Framework
+    </p>
+
+    <button type="submit">Register</button>
+</form>
+
+<hr />
+<h3>Registered Users:</h3>
+@if (ViewBag.Users != null)
+{
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Gender</th>
+            <th>Courses</th>
+        </tr>
+        @foreach (var u in ViewBag.Users)
+        {
+            <tr>
+                <td>@u.Name</td>
+                <td>@u.Email</td>
+                <td>@u.Gender</td>
+                <td>@u.Courses</td>
+            </tr>
+        }
+    </table>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+Index.cshtml
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
+Program.cs
