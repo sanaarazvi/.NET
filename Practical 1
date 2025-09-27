@@ -53,3 +53,86 @@ namespace MiniCrud.Controllers
     }
 }
 HomeController.cs
+@model List<MiniCrud.Controllers.HomeController.Product>
+@{
+    var editId = (int?)ViewBag.EditId; Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mini Product CRUD</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 60%;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 6px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Add Product</h2>
+    <form method="post" action="/Home/Add">
+        Name: <input name="name" required />
+        Price: <input type="number" name="price" required />
+        <button type="submit">Add</button>
+    </form>
+
+    <h2>Products</h2>
+    <table>
+        <tr><th>Id</th><th>Name</th><th>Price</th><th>Actions</th></tr>
+        @if (!Model.Any())
+        {
+            <tr><td colspan="4" style="text-align:center">No products added yet</td></tr>
+        }
+        else
+        {
+            foreach (var p in Model)
+            {
+                if (editId == p.Id)
+                {
+                    <tr>
+                        <form method="post" action="/Home/Edit">
+                        <td>@p.Id <input type="hidden" name="id" value="@p.Id" /></td>
+                        <td><input name="name" value="@p.Name" /></td>
+                        <td><input type="number" name="price" value="@p.Price" /></td>
+                        <td>
+                            <button type="submit">Save</button>
+                            <a href="/Home">Cancel</a>
+                        </td>
+                        </form>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        <td>@p.Id</td>
+                        <td>@p.Name</td>
+                        <td>@p.Price</td>
+                        <td>
+                            <a href="/Home?editId=@p.Id">Edit</a>
+                            <form method="post" action="/Home/Delete" style="display:inline">
+                                <input type="hidden" name="id" value="@p.Id" />
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+        }
+    </table>
+</body>
+</html>
+Index.cshtml
