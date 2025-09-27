@@ -56,14 +56,12 @@ namespace SimpleBlog.Controllers
     {
         static List<Post> posts = new List<Post>();
 
-        // Show all posts
         public IActionResult Index()
         {
             var vm = new BlogViewModel { Posts = posts, ActionType = "Index" };
             return View("Blog", vm);
         }
 
-        // Add new post (GET)
         [HttpGet]
         public IActionResult Add()
         {
@@ -71,7 +69,6 @@ namespace SimpleBlog.Controllers
             return View("Blog", vm);
         }
 
-        // Add new post (POST)
         [HttpPost]
         public IActionResult Add(Post p)
         {
@@ -85,7 +82,7 @@ namespace SimpleBlog.Controllers
             return View("Blog", vm);
         }
 
-        // Edit post (GET)
+     
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -95,7 +92,7 @@ namespace SimpleBlog.Controllers
             return View("Blog", vm);
         }
 
-        // Edit post (POST)
+     
         [HttpPost]
         public IActionResult Edit(Post p)
         {
@@ -113,7 +110,7 @@ namespace SimpleBlog.Controllers
             return View("Blog", vm);
         }
 
-        // Models
+       
         public class BlogViewModel
         {
             public List<Post> Posts { get; set; } = new List<Post>();
