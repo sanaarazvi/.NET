@@ -52,14 +52,14 @@ namespace IceCreamParlourApp.Controllers
         {
             _context = context;
         }
-        // View all orders
+       
         public IActionResult Index()
         {
             return View(_context.Orders.ToList());
         }
-        // Create order - GET
+      
         public IActionResult Create() => View();
-        // Create order - POST
+      
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Order order)
@@ -72,14 +72,14 @@ namespace IceCreamParlourApp.Controllers
             }
             return View(order);
         }
-        // Edit order - GET
+        
         public IActionResult Edit(int id)
         {
             var order = _context.Orders.Find(id);
             if (order == null) return NotFound();
             return View(order);
         }
-        // Edit order - POST
+      
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Order order)
@@ -92,7 +92,7 @@ namespace IceCreamParlourApp.Controllers
             }
             return View(order);
         }
-        // Delete order
+     
         public IActionResult Delete(int id)
         {
             var order = _context.Orders.Find(id);
@@ -101,7 +101,7 @@ namespace IceCreamParlourApp.Controllers
             _context.SaveChanges();
             return RedirectToAction(nameof(Index));
         }
-        // View order details
+     
         public IActionResult Details(int id)
         {
             var order = _context.Orders.Find(id);
@@ -117,7 +117,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-// Add DbContext
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 var app = builder.Build();
